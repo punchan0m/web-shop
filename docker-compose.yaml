@@ -1,0 +1,73 @@
+version: "3.9"
+
+services:
+  db:
+    container_name: webshop-db
+    image: postgres:15
+    restart: always
+    env_file:
+      - ./.env.db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - webshop
+
+  pgadmin:
+    container_name: webshop-pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on:
+      - db
+    networks:
+      - webshop
+      
+  server:
+    container_name: webshop-server
+    build: ./server
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+      - /app/.pnpm-store
+    env_file:
+      - ./server/.env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - webshop
+
+  client:
+    container_name: webshop-client
+    build: ./client
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+      - /app/.pnpm-store
+    env_file:
+      - ./client/.env
+    depends_on:
+      - server
+    networks:
+      - webshop
+
+volumes:
+  postgres_data:
+
+networks:
+  webshop:
