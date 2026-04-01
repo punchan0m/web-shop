@@ -32,18 +32,20 @@ services:
       - db
     networks:
       - webshop
-      
+
   server:
     container_name: webshop-server
     build: ./server
+    command: pnpm run start:dev
     ports:
       - "3000:3000"
     volumes:
       - ./server:/app
       - /app/node_modules
-      - /app/.pnpm-store
     env_file:
-      - ./server/.env
+      - ./server/.env.docker
+    environment:
+      - NODE_ENV=docker
     depends_on:
       db:
         condition: service_healthy
@@ -53,12 +55,12 @@ services:
   client:
     container_name: webshop-client
     build: ./client
+    command: pnpm run dev -- --host
     ports:
       - "5173:5173"
     volumes:
       - ./client:/app
       - /app/node_modules
-      - /app/.pnpm-store
     env_file:
       - ./client/.env
     depends_on:
