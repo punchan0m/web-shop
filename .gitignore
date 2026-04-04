@@ -1,4 +1,5 @@
 .env.db
 .env
 .env.local
-.env.*.local
+.env.*.localupload/
+server/src/uploads/

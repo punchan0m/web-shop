@@ -1,0 +1,10 @@
+node_modules
+dist
+.DS_Store
+*.log
+.git
+coverage
+.vscode
+.idea
+test
+*.spec.ts
