@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ROUTES } from '@/constants/routes'
+import { useCategories } from '@/features/category/hooks/use-categories'
 import { useContentSettings } from '@/features/content/content-store'
+import { useProducts } from '@/features/product/hooks/use-products'
 import { resolveImageUrl } from '@/lib/utils'
 
 export function HomePage() {
   const content = useContentSettings()
   const images = content.home.images.slice(0, 5)
+  const { data: categories = [] } = useCategories()
+  const { data: products = [] } = useProducts()
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   useEffect(() => {
@@ -26,11 +30,22 @@ export function HomePage() {
   }, [images.length])
 
   const currentImage = images[currentImageIndex]
+  const categoryCount = categories.length
+  const productCount = products.length
+  const imageCount = images.length
+
+  const featuredCategories = [...categories]
+    .sort((a, b) => {
+      const aCount = products.filter((product) => (product.categories || []).some((category) => category.id === a.id)).length
+      const bCount = products.filter((product) => (product.categories || []).some((category) => category.id === b.id)).length
+      return bCount - aCount || (a.name || '').localeCompare(b.name || '')
+    })
+    .slice(0, 4)
 
   return (
     <section className="mx-auto w-full max-w-6xl space-y-8">
-      <div className="grid gap-8 lg:grid-cols-[1.05fr_1fr] lg:items-stretch">
-        <div className="animate-reveal rounded-3xl border border-ink/10 bg-white/90 p-7 shadow-soft">
+      <div className="grid gap-8 lg:grid-cols-[1.05fr_1fr] lg:items-start">
+        <div className="animate-reveal self-start rounded-3xl border border-ink/10 bg-white/90 p-7 shadow-soft">
           <h1 className="mt-4 font-display text-4xl font-extrabold leading-tight text-ink md:text-6xl">
             {content.home.title}
           </h1>
@@ -64,7 +79,7 @@ export function HomePage() {
               />
             ) : (
               <div className="flex h-full items-center justify-center text-sm uppercase tracking-[0.2em] text-white/60">
-                No image
+                ไม่มีรูปภาพ
               </div>
             )}
 
@@ -87,6 +102,78 @@ export function HomePage() {
                 ))}
               </div>
             ) : null}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        {[
+          { label: 'หมวดหมู่', value: categoryCount.toString(), note: 'คอลเลกชันที่คัดมาแล้ว' },
+          { label: 'สินค้า', value: productCount.toString(), note: 'พร้อมให้เลือกชม' },
+          { label: 'รูปหน้าแรก', value: imageCount.toString(), note: 'แก้ไขได้จากหน้าแอดมิน' },
+        ].map((item) => (
+          <div key={item.label} className="rounded-2xl border border-ink/10 bg-white/90 p-5 shadow-soft">
+            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">{item.label}</p>
+            <p className="mt-3 font-display text-3xl font-extrabold text-ink">{item.value}</p>
+            <p className="mt-1 text-sm text-ink/65">{item.note}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[1fr_1.15fr]">
+        <div className="rounded-3xl border border-ink/10 bg-white/90 p-6 shadow-soft">
+          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">ทำไมต้องเลือกที่นี่</p>
+          <h2 className="mt-3 font-display text-2xl font-extrabold text-ink">ทุกอย่างที่คุณต้องการอยู่ในที่เดียว</h2>
+          <div className="mt-5 grid gap-3">
+            {[
+              'เลือกดูสินค้าแยกตามหมวดหมู่ พร้อมจำนวนสินค้าให้เห็นชัดเจน',
+              'เปรียบเทียบสินค้าได้ง่ายด้วยราคาและรูปภาพที่ชัดเจน',
+            ].map((text) => (
+              <div key={text} className="rounded-2xl border border-ink/10 bg-parchment/40 px-4 py-3 text-sm text-ink/75">
+                {text}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-ink/10 bg-white/90 p-6 shadow-soft">
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">หมวดหมู่แนะนำ</p>
+              <h2 className="mt-3 font-display text-2xl font-extrabold text-ink">คอลเลกชันยอดนิยม</h2>
+            </div>
+            <Link to={ROUTES.categories} className="text-sm font-semibold text-brass transition hover:opacity-80">
+              ดูทั้งหมด
+            </Link>
+          </div>
+
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            {featuredCategories.length > 0 ? (
+              featuredCategories.map((category) => {
+                const matchedCount = products.filter((product) => (product.categories || []).some((item) => item.id === category.id)).length
+
+                return (
+                  <Link
+                    key={category.id}
+                    to={`${ROUTES.products}?category=${category.id}`}
+                    className="group rounded-2xl border border-ink/10 bg-parchment/30 p-4 transition hover:-translate-y-0.5 hover:border-brass/30 hover:bg-white"
+                  >
+                    <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-ink/45">คอลเลกชัน</p>
+                    <p className="mt-2 line-clamp-1 font-display text-lg font-extrabold text-ink">{category.name || 'Untitled'}</p>
+                    <p className="mt-2 text-sm text-ink/65">
+                      {matchedCount} สินค้า
+                    </p>
+                    <p className="mt-3 text-sm font-semibold text-brass transition group-hover:translate-x-0.5">
+                      ดูคอลเลกชัน
+                    </p>
+                  </Link>
+                )
+              })
+            ) : (
+              <div className="rounded-2xl border border-dashed border-ink/15 p-5 text-sm text-ink/60">
+                ยังไม่มีหมวดหมู่ กรุณาเพิ่มจากหน้าแอดมินเพื่อให้ส่วนนี้ใช้งานได้เต็มที่
+              </div>
+            )}
           </div>
         </div>
       </div>
