@@ -6,6 +6,7 @@ import { useCategories } from '@/features/category/hooks/use-categories'
 import { CategoryPill } from '@/features/category/components/category-pill'
 
 const PAGE_SIZE = 20
+const safeName = (value?: string | null) => value || ''
 
 export function ProductsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -20,14 +21,14 @@ export function ProductsPage() {
   const { data: categories = [] } = useCategories()
 
   const sortedCategories = useMemo(() => {
-    return [...categories].sort((a, b) => a.name.localeCompare(b.name))
+    return [...categories].sort((a, b) => safeName(a.name).localeCompare(safeName(b.name)))
   }, [categories])
 
   const sortedProducts = useMemo(() => {
     const list = [...products]
 
     if (sortBy === 'name-desc') {
-      return list.sort((a, b) => b.name.localeCompare(a.name))
+      return list.sort((a, b) => safeName(b.name).localeCompare(safeName(a.name)))
     }
 
     if (sortBy === 'newest') {
@@ -38,7 +39,7 @@ export function ProductsPage() {
       })
     }
 
-    return list.sort((a, b) => a.name.localeCompare(b.name))
+    return list.sort((a, b) => safeName(a.name).localeCompare(safeName(b.name)))
   }, [products, sortBy])
 
   const categoryProductCounts = useMemo(() => {
@@ -59,7 +60,7 @@ export function ProductsPage() {
       return categoriesWithProducts
     }
 
-    return categoriesWithProducts.filter((category) => category.name.toLowerCase().includes(query))
+    return categoriesWithProducts.filter((category) => safeName(category.name).toLowerCase().includes(query))
   }, [sortedCategories, categorySearch, categoryProductCounts])
 
   const filteredProducts = useMemo(() => {

@@ -8,6 +8,7 @@ import { useProducts } from '@/features/product/hooks/use-products'
 import { resolveImageUrl } from '@/lib/utils'
 
 const PAGE_SIZE = 20
+const safeName = (value?: string | null) => value || ''
 
 export function CategoriesPage() {
   const navigate = useNavigate()
@@ -38,7 +39,7 @@ export function CategoriesPage() {
   }
 
   const sortedCategories = useMemo(() => {
-    return [...categories].sort((a, b) => a.name.localeCompare(b.name))
+    return [...categories].sort((a, b) => safeName(a.name).localeCompare(safeName(b.name)))
   }, [categories])
 
   const filteredCategories = useMemo(() => {

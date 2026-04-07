@@ -24,6 +24,7 @@ import { resolveImageUrl } from '@/lib/utils'
 const NAME_MAX = 30
 const DESCRIPTION_MAX = 200
 const IMAGE_MAX = 5
+const safeName = (value?: string | null) => value || ''
 
 type FilePickerProps = {
   id: string
@@ -108,11 +109,11 @@ export function AdminPage() {
   const deleteImage = useDeleteImage()
 
   const sortedCategories = useMemo(() => {
-    return [...categories].sort((a, b) => a.name.localeCompare(b.name))
+    return [...categories].sort((a, b) => safeName(a.name).localeCompare(safeName(b.name)))
   }, [categories])
 
   const sortedProducts = useMemo(() => {
-    return [...products].sort((a, b) => a.name.localeCompare(b.name))
+    return [...products].sort((a, b) => safeName(a.name).localeCompare(safeName(b.name)))
   }, [products])
 
   const filteredCreateCategories = useMemo(() => {
@@ -147,7 +148,7 @@ export function AdminPage() {
       if (!aSelected && bSelected) {
         return 1
       }
-      return a.name.localeCompare(b.name)
+      return safeName(a.name).localeCompare(safeName(b.name))
     })
   }, [sortedCategories, editingProductCategoryQuery, editingSelectedCategoryIds])
 
