@@ -32,7 +32,6 @@ export function HomePage() {
   const currentImage = images[currentImageIndex]
   const categoryCount = categories.length
   const productCount = products.length
-  const imageCount = images.length
 
   const featuredCategories = [...categories]
     .sort((a, b) => {
