@@ -19,6 +19,7 @@ const HOME_IMAGE_MAX = 5
 const ABOUT_IMAGE_MAX = 20
 const NAME_MAX = 30
 const DESCRIPTION_MAX = 200
+const HOME_DESCRIPTION_MAX = 5000
 const DEFAULT_MAP_QUERY = 'Q8MV+GJ Pak Trae, Ranot District, Songkhla'
 const FOOTER_MAX = 120
 
@@ -201,8 +202,8 @@ export function AdminContentPanel() {
       return
     }
 
-    if (homeDescription.trim().length > DESCRIPTION_MAX) {
-      window.alert(`Home description must be at most ${DESCRIPTION_MAX} characters.`)
+    if (homeDescription.trim().length > HOME_DESCRIPTION_MAX) {
+      window.alert(`Home description must be at most ${HOME_DESCRIPTION_MAX} characters.`)
       return
     }
 
@@ -390,7 +391,7 @@ export function AdminContentPanel() {
             <h2 className="font-display text-2xl font-bold">Home content</h2>
             <div className="space-y-3">
               <Input value={homeTitle} maxLength={NAME_MAX} onChange={(event) => setHomeTitle(event.target.value)} placeholder="Title" />
-              <Textarea value={homeDescription} maxLength={DESCRIPTION_MAX} onChange={(event) => setHomeDescription(event.target.value)} placeholder="Description" className="min-h-32" />
+              <Textarea value={homeDescription} maxLength={HOME_DESCRIPTION_MAX} onChange={(event) => setHomeDescription(event.target.value)} placeholder="Description" className="min-h-32" />
               <FilePicker id="home-content-images" selectedCount={homeFiles.length} onChange={(event) => setHomeFiles(Array.from(event.target.files || []).slice(0, HOME_IMAGE_MAX - homeImages.length))} />
             </div>
             <div className="flex gap-2">
