@@ -8,6 +8,12 @@
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   color: #22262b;
   background: #f4f1ea;
+  --theme-primary: #705d00;
+  --theme-secondary: #e8e2d9;
+  --theme-text-primary: #2d3339;
+  --theme-text-secondary: #596066;
+  --theme-button-bg: #705d00;
+  --theme-button-text: #ffffff;
 }
 
 body {

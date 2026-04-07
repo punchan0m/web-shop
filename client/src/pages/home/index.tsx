@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ROUTES } from '@/constants/routes'
 import { useContentSettings } from '@/features/content/content-store'
+import { resolveImageUrl } from '@/lib/utils'
 
 export function HomePage() {
   const content = useContentSettings()
@@ -57,7 +58,7 @@ export function HomePage() {
           <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-[linear-gradient(140deg,#AE8A37,#D8D3C8)]">
             {currentImage?.url ? (
               <img
-                src={`${import.meta.env.VITE_API_URL}${currentImage.url}`}
+                src={resolveImageUrl(currentImage.url)}
                 alt={content.home.title}
                 className="h-full w-full object-cover"
               />

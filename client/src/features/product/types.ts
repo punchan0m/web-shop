@@ -11,6 +11,7 @@ export type ProductCategory = {
 export type Product = {
   id: string
   name: string
+  price?: number
   description?: string
   images?: ProductImage[]
   categories?: ProductCategory[]
@@ -20,6 +21,7 @@ export type Product = {
 
 export type CreateProductInput = {
   name: string
+  price?: number
   description?: string
   categoryIds?: string[]
   images?: Array<{ url: string }>

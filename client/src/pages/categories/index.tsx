@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { ROUTES } from '@/constants/routes'
 import { useCategories } from '@/features/category/hooks/use-categories'
 import { useProducts } from '@/features/product/hooks/use-products'
+import { resolveImageUrl } from '@/lib/utils'
 
 const PAGE_SIZE = 20
 
@@ -67,9 +68,14 @@ export function CategoriesPage() {
   }, [products])
 
   return (
-    <section className="mx-auto w-full max-w-5xl space-y-5">
+    <section className="mx-auto w-full max-w-[1440px] space-y-10" style={{ color: 'var(--theme-text-primary)' }}>
+      <div className="space-y-4">
+        <p className="text-[11px] font-bold uppercase tracking-[0.24em]" style={{ color: 'var(--theme-primary)' }}>Product Catalog</p>
+        <h1 className="text-4xl font-extrabold tracking-tight md:text-5xl">Instrument Categories</h1>
+        <div className="h-1 w-24" style={{ backgroundColor: 'var(--theme-primary)' }} />
+      </div>
+
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <h2 className="font-display text-2xl font-extrabold text-ink">Categories</h2>
         <Input
           value={search}
           onChange={(event) => {
@@ -77,7 +83,8 @@ export function CategoriesPage() {
             setPage(1)
           }}
           placeholder="Search category..."
-          className="w-full max-w-sm"
+          className="h-11 w-full max-w-sm rounded-lg border bg-white px-3 text-sm"
+          style={{ borderColor: 'color-mix(in srgb, var(--theme-text-primary) 18%, transparent)' }}
         />
       </div>
 
@@ -85,21 +92,28 @@ export function CategoriesPage() {
         <p className="text-sm text-ink/60">Loading categories...</p>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4">
+          <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
             {pagedCategories.map((category) => (
-              <button
+              <div
                 key={category.id}
-                type="button"
-                className="text-left"
+                role="button"
+                tabIndex={0}
+                className="cursor-pointer text-left"
                 onClick={() => navigate(`${ROUTES.products}?category=${category.id}`)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault()
+                    navigate(`${ROUTES.products}?category=${category.id}`)
+                  }
+                }}
               >
-                <Card className="h-full space-y-2">
-                  <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-ash/40">
+                <Card className="h-full overflow-hidden rounded-none border-0 bg-white p-0 shadow-[0_18px_40px_-28px_rgba(0,0,0,0.45)] transition-all duration-300 hover:-translate-y-1">
+                  <div className="relative aspect-[4/3] overflow-hidden bg-ash/40">
                     {(category.images || []).length > 0 ? (
                       <img
-                        src={`${import.meta.env.VITE_API_URL}${(category.images || [])[((imageIndexByCategoryId[category.id] || 0) % (category.images || []).length)]?.url}`}
+                        src={resolveImageUrl((category.images || [])[((imageIndexByCategoryId[category.id] || 0) % (category.images || []).length)]?.url)}
                         alt={category.name}
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-cover grayscale transition-all duration-500 hover:grayscale-0"
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center text-xs uppercase tracking-[0.2em] text-ink/40">
@@ -135,20 +149,25 @@ export function CategoriesPage() {
                     ) : null}
                   </div>
 
-                  <p className="truncate font-display text-lg font-bold text-ink">{category.name}</p>
-                  <p className="line-clamp-2 min-h-10 break-words text-sm text-ink/70">
-                    {category.description || 'No description'}
-                  </p>
-                  <p className="text-xs uppercase tracking-[0.15em] text-brass">
-                    {countByCategoryId.get(category.id) || 0} product(s)
-                  </p>
+                  <div className="space-y-3 p-7">
+                    <p className="line-clamp-1 text-xl font-extrabold uppercase tracking-tight">{category.name}</p>
+                    <p className="line-clamp-3 min-h-[60px] text-sm leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
+                      {category.description || 'Professional category with curated instruments for laboratory and industrial operations.'}
+                    </p>
+                    <div className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em]" style={{ color: 'var(--theme-primary)' }}>
+                      Explore collection <span>{'>'}</span>
+                    </div>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: 'var(--theme-text-secondary)' }}>
+                      {countByCategoryId.get(category.id) || 0} product(s)
+                    </p>
+                  </div>
                 </Card>
-              </button>
+              </div>
             ))}
           </div>
 
           <div className="flex items-center justify-between rounded-xl border border-ink/10 bg-white/70 px-4 py-3 text-sm">
-            <span className="text-ink/70">
+            <span style={{ color: 'var(--theme-text-secondary)' }}>
               Showing {filteredCategories.length === 0 ? 0 : start + 1}-{Math.min(start + PAGE_SIZE, filteredCategories.length)} of {filteredCategories.length}
             </span>
             <div className="flex items-center gap-2">
@@ -171,6 +190,7 @@ export function CategoriesPage() {
               </button>
             </div>
           </div>
+
         </>
       )}
     </section>

@@ -8,6 +8,14 @@ const defaultContentSettings: ContentSettings = {
     footerLeft: 'Curating with intent since 2026.',
     footerRight: 'shopname',
   },
+  theme: {
+    primary: '#705d00',
+    secondary: '#e8e2d9',
+    textPrimary: '#2d3339',
+    textSecondary: '#596066',
+    buttonBg: '#705d00',
+    buttonText: '#ffffff',
+  },
   home: {
     title: 'Objects with intent, not noise.',
     description:

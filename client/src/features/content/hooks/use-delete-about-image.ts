@@ -1,11 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { deleteAboutImage } from '@/features/content/api/content.api'
+import { deleteImage } from '@/features/image/api/image.api'
 
 export function useDeleteAboutImage() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: deleteAboutImage,
+    mutationFn: deleteImage,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['content'] })
     },
