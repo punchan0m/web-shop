@@ -93,7 +93,7 @@ export function CategoriesPage() {
         <p className="text-sm text-ink/60">Loading categories...</p>
       ) : (
         <>
-          <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-8 grid-cols-2 md:grid-cols-2 xl:grid-cols-3">
             {pagedCategories.map((category) => (
               <div
                 key={category.id}
