@@ -114,7 +114,7 @@ export function CategoriesPage() {
                       <img
                         src={resolveImageUrl((category.images || [])[((imageIndexByCategoryId[category.id] || 0) % (category.images || []).length)]?.url)}
                         alt={category.name}
-                        className="h-full w-full object-cover grayscale transition-all duration-500 hover:grayscale-0"
+                        className="h-full w-full object-cover transition-all duration-500 hover:grayscale-0"
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center text-xs uppercase tracking-[0.2em] text-ink/40">
