@@ -32,7 +32,6 @@ export function HomePage() {
   const currentImage = images[currentImageIndex]
   const categoryCount = categories.length
   const productCount = products.length
-  const imageCount = images.length
 
   const featuredCategories = [...categories]
     .sort((a, b) => {
@@ -110,7 +109,6 @@ export function HomePage() {
         {[
           { label: 'หมวดหมู่', value: categoryCount.toString(), note: 'คอลเลกชันที่คัดมาแล้ว' },
           { label: 'สินค้า', value: productCount.toString(), note: 'พร้อมให้เลือกชม' },
-          { label: 'รูปหน้าแรก', value: imageCount.toString(), note: 'แก้ไขได้จากหน้าแอดมิน' },
         ].map((item) => (
           <div key={item.label} className="rounded-2xl border border-ink/10 bg-white/90 p-5 shadow-soft">
             <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">{item.label}</p>
