@@ -12,7 +12,6 @@ export function ProductsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const selectedCategoryId = searchParams.get('category')
   const [query, setQuery] = useState('')
-  const [priceRange, setPriceRange] = useState('')
   const [sortBy, setSortBy] = useState<'name-asc' | 'name-desc' | 'newest'>('name-asc')
   const [categorySearch, setCategorySearch] = useState('')
   const [visibleCategoryCount, setVisibleCategoryCount] = useState(10)
@@ -65,10 +64,6 @@ export function ProductsPage() {
 
   const filteredProducts = useMemo(() => {
     const queryLower = query.trim().toLowerCase()
-    const cleanedRange = priceRange.replace(/\s+/g, '')
-    const rangeMatch = cleanedRange.match(/^(\d+(?:\.\d+)?)?-(\d+(?:\.\d+)?)?$/)
-    const rangeStart = rangeMatch?.[1] ? Number(rangeMatch[1]) : undefined
-    const rangeEnd = rangeMatch?.[2] ? Number(rangeMatch[2]) : undefined
 
     return sortedProducts.filter((product) => {
       const categoryMatched = selectedCategoryId
@@ -81,19 +76,9 @@ export function ProductsPage() {
             .includes(queryLower)
         : true
 
-      const price = typeof product.price === 'number' ? product.price : undefined
-      const rangeMatched = !rangeMatch
-        ? true
-        : (() => {
-            if (typeof price === 'undefined') return false
-            if (typeof rangeStart !== 'undefined' && price < rangeStart) return false
-            if (typeof rangeEnd !== 'undefined' && price > rangeEnd) return false
-            return true
-          })()
-
-      return categoryMatched && textMatched && rangeMatched
+      return categoryMatched && textMatched
     })
-  }, [sortedProducts, selectedCategoryId, query, priceRange])
+  }, [sortedProducts, selectedCategoryId, query])
 
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE))
   const currentPage = Math.min(page, totalPages)
@@ -111,7 +96,23 @@ export function ProductsPage() {
   }
 
   return (
-    <section className="mx-auto flex w-full max-w-[1440px] gap-8 xl:gap-12" style={{ color: 'var(--theme-text-primary)' }}>
+    <section className="mx-auto flex w-full max-w-[1440px] flex-col gap-8 xl:gap-12" style={{ color: 'var(--theme-text-primary)' }}>
+      {/* Mobile search bar */}
+      <div className="space-y-3 lg:hidden">
+        <input
+          type="text"
+          value={query}
+          onChange={(event) => {
+            setQuery(event.target.value)
+            setPage(1)
+          }}
+          placeholder="Search products..."
+          className="h-11 w-full rounded-lg border px-3 text-sm"
+          style={{ borderColor: 'color-mix(in srgb, var(--theme-text-primary) 16%, transparent)' }}
+        />
+      </div>
+
+      <div className="flex w-full gap-8 xl:gap-12">
       <aside className="sticky top-24 hidden h-fit w-72 shrink-0 space-y-8 rounded-xl border p-6 lg:block" style={{ background: 'white', borderColor: 'color-mix(in srgb, var(--theme-text-primary) 18%, transparent)' }}>
         <section className="space-y-3">
           <p className="text-[11px] font-bold uppercase tracking-[0.22em]" style={{ color: 'var(--theme-text-secondary)' }}>Quick search</p>
@@ -123,17 +124,6 @@ export function ProductsPage() {
               setPage(1)
             }}
             placeholder="Search products..."
-            className="h-11 w-full rounded-lg border px-3 text-sm"
-            style={{ borderColor: 'color-mix(in srgb, var(--theme-text-primary) 16%, transparent)' }}
-          />
-          <input
-            type="text"
-            value={priceRange}
-            onChange={(event) => {
-              setPriceRange(event.target.value)
-              setPage(1)
-            }}
-            placeholder="Price range: start-end (e.g. 100-500)"
             className="h-11 w-full rounded-lg border px-3 text-sm"
             style={{ borderColor: 'color-mix(in srgb, var(--theme-text-primary) 16%, transparent)' }}
           />
@@ -255,6 +245,7 @@ export function ProductsPage() {
             </div>
           </>
         )}
+      </div>
       </div>
     </section>
   )
