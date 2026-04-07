@@ -44,7 +44,7 @@ export function HomePage() {
 
   return (
     <section className="mx-auto w-full max-w-6xl space-y-8">
-      <div className="grid gap-8 lg:grid-cols-[1.05fr_1fr] lg:items-start">
+      <div className="grid gap-8 lg:grid-cols-[1fr_1.15fr] lg:items-stretch">
         <div className="animate-reveal self-start rounded-3xl border border-ink/10 bg-white/90 p-7 shadow-soft">
           <h1 className="mt-4 font-display text-4xl font-extrabold leading-tight text-ink md:text-6xl">
             {content.home.title}
@@ -69,8 +69,8 @@ export function HomePage() {
           </div>
         </div>
 
-        <div className="relative animate-reveal overflow-hidden rounded-3xl border border-ink/10 bg-white p-4 shadow-soft">
-          <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-[linear-gradient(140deg,#AE8A37,#D8D3C8)]">
+        <div className="relative animate-reveal flex flex-col overflow-hidden rounded-3xl border border-ink/10 bg-white p-4 shadow-soft">
+          <div className="relative min-h-96 flex-1 overflow-hidden rounded-2xl bg-[linear-gradient(140deg,#AE8A37,#D8D3C8)]">
             {currentImage?.url ? (
               <img
                 src={resolveImageUrl(currentImage.url)}

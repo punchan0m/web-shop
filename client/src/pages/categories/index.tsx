@@ -84,7 +84,7 @@ export function CategoriesPage() {
             setPage(1)
           }}
           placeholder="Search category..."
-          className="h-11 w-full max-w-sm rounded-lg border bg-white px-3 text-sm"
+          className="h-11 w-full rounded-lg border bg-white px-3 text-sm md:max-w-sm"
           style={{ borderColor: 'color-mix(in srgb, var(--theme-text-primary) 18%, transparent)' }}
         />
       </div>
