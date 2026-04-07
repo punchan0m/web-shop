@@ -14,7 +14,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   const currentImage = images[currentImageIndex]
   const formattedPrice = typeof product.price === 'number'
-    ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(product.price)
+    ? new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(product.price)
     : 'N/A'
 
   const goPrev = () => {
