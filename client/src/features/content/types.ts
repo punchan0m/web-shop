@@ -9,6 +9,15 @@ export type LayoutContent = {
   footerRight: string
 }
 
+export type ThemeContent = {
+  primary: string
+  secondary: string
+  textPrimary: string
+  textSecondary: string
+  buttonBg: string
+  buttonText: string
+}
+
 export type HomeContent = {
   title: string
   description: string
@@ -36,6 +45,7 @@ export type ContactContent = {
 
 export type ContentSettings = {
   layout: LayoutContent
+  theme: ThemeContent
   home: HomeContent
   about: AboutContent
   contact: ContactContent

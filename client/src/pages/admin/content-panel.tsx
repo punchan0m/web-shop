@@ -13,6 +13,7 @@ import { useDeleteHomeImage } from '@/features/content/hooks/use-delete-home-ima
 import { useDeleteAboutImage } from '@/features/content/hooks/use-delete-about-image'
 import { useUpdateLayoutContent } from '@/features/content/hooks/use-update-layout-content'
 import type { ContentImage } from '@/features/content/types'
+import { resolveImageUrl } from '@/lib/utils'
 
 const HOME_IMAGE_MAX = 5
 const ABOUT_IMAGE_MAX = 20
@@ -59,7 +60,7 @@ function ImageGrid({
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
       {images.map((image) => (
         <div key={image.id} className="overflow-hidden rounded-2xl border border-ink/10 bg-white p-2 shadow-soft">
-          <img src={`${import.meta.env.VITE_API_URL}${image.url}`} alt="content" className="h-36 w-full rounded-xl object-cover" />
+          <img src={resolveImageUrl(image.url)} alt="content" className="h-36 w-full rounded-xl object-cover" />
           <div className="mt-2 flex items-center justify-between gap-2">
             <span className="truncate text-xs text-ink/50">ID: {image.id}</span>
             <Button type="button" className="h-8 bg-red-600 text-white hover:bg-red-700" onClick={() => onDelete(image)}>
@@ -87,6 +88,12 @@ export function AdminContentPanel() {
   const [siteName, setSiteName] = useState(content.layout.navbarTitle)
   const [footerLeft, setFooterLeft] = useState(content.layout.footerLeft)
   const [footerRight, setFooterRight] = useState(content.layout.footerRight)
+  const [themePrimary, setThemePrimary] = useState(content.theme.primary)
+  const [themeSecondary, setThemeSecondary] = useState(content.theme.secondary)
+  const [themeTextPrimary, setThemeTextPrimary] = useState(content.theme.textPrimary)
+  const [themeTextSecondary, setThemeTextSecondary] = useState(content.theme.textSecondary)
+  const [themeButtonBg, setThemeButtonBg] = useState(content.theme.buttonBg)
+  const [themeButtonText, setThemeButtonText] = useState(content.theme.buttonText)
 
   const [homeTitle, setHomeTitle] = useState(content.home.title)
   const [homeDescription, setHomeDescription] = useState(content.home.description)
@@ -113,6 +120,12 @@ export function AdminContentPanel() {
     setSiteName(content.layout.navbarTitle)
     setFooterLeft(content.layout.footerLeft)
     setFooterRight(content.layout.footerRight)
+    setThemePrimary(content.theme.primary)
+    setThemeSecondary(content.theme.secondary)
+    setThemeTextPrimary(content.theme.textPrimary)
+    setThemeTextSecondary(content.theme.textSecondary)
+    setThemeButtonBg(content.theme.buttonBg)
+    setThemeButtonText(content.theme.buttonText)
     setHomeTitle(content.home.title)
     setHomeDescription(content.home.description)
     setHomeImages(content.home.images)
@@ -147,10 +160,24 @@ export function AdminContentPanel() {
       return
     }
 
+    const hexColor = /^#([0-9a-fA-F]{6})$/
+    if (!hexColor.test(themePrimary) || !hexColor.test(themeSecondary) || !hexColor.test(themeTextPrimary) || !hexColor.test(themeTextSecondary) || !hexColor.test(themeButtonBg) || !hexColor.test(themeButtonText)) {
+      window.alert('Theme colors must be HEX format, for example: #705D00')
+      return
+    }
+
     await updateLayout.mutateAsync({
       navbarTitle: siteName.trim(),
       footerLeft: footerLeft.trim(),
       footerRight: footerRight.trim(),
+      theme: {
+        primary: themePrimary,
+        secondary: themeSecondary,
+        textPrimary: themeTextPrimary,
+        textSecondary: themeTextSecondary,
+        buttonBg: themeButtonBg,
+        buttonText: themeButtonText,
+      },
     })
   }
 
@@ -307,6 +334,48 @@ export function AdminContentPanel() {
             <div className="space-y-1">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink/60">Footer right</p>
               <Input value={footerRight} maxLength={FOOTER_MAX} onChange={(event) => setFooterRight(event.target.value)} placeholder="shopname" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink/60">สีหลัก</p>
+              <div className="flex gap-2">
+                <Input value={themePrimary} maxLength={7} onChange={(event) => setThemePrimary(event.target.value)} placeholder="#705D00" />
+                <input type="color" value={themePrimary} onChange={(event) => setThemePrimary(event.target.value)} className="h-11 w-14 rounded-xl border border-ink/15 bg-white p-1" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink/60">สีรอง</p>
+              <div className="flex gap-2">
+                <Input value={themeSecondary} maxLength={7} onChange={(event) => setThemeSecondary(event.target.value)} placeholder="#E8E2D9" />
+                <input type="color" value={themeSecondary} onChange={(event) => setThemeSecondary(event.target.value)} className="h-11 w-14 rounded-xl border border-ink/15 bg-white p-1" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink/60">สีตัวอักษรหลัก</p>
+              <div className="flex gap-2">
+                <Input value={themeTextPrimary} maxLength={7} onChange={(event) => setThemeTextPrimary(event.target.value)} placeholder="#2D3339" />
+                <input type="color" value={themeTextPrimary} onChange={(event) => setThemeTextPrimary(event.target.value)} className="h-11 w-14 rounded-xl border border-ink/15 bg-white p-1" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink/60">สีตัวอักษรรอง</p>
+              <div className="flex gap-2">
+                <Input value={themeTextSecondary} maxLength={7} onChange={(event) => setThemeTextSecondary(event.target.value)} placeholder="#596066" />
+                <input type="color" value={themeTextSecondary} onChange={(event) => setThemeTextSecondary(event.target.value)} className="h-11 w-14 rounded-xl border border-ink/15 bg-white p-1" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink/60">สีพื้นปุ่ม</p>
+              <div className="flex gap-2">
+                <Input value={themeButtonBg} maxLength={7} onChange={(event) => setThemeButtonBg(event.target.value)} placeholder="#705D00" />
+                <input type="color" value={themeButtonBg} onChange={(event) => setThemeButtonBg(event.target.value)} className="h-11 w-14 rounded-xl border border-ink/15 bg-white p-1" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink/60">สีตัวอักษรบนปุ่ม</p>
+              <div className="flex gap-2">
+                <Input value={themeButtonText} maxLength={7} onChange={(event) => setThemeButtonText(event.target.value)} placeholder="#FFFFFF" />
+                <input type="color" value={themeButtonText} onChange={(event) => setThemeButtonText(event.target.value)} className="h-11 w-14 rounded-xl border border-ink/15 bg-white p-1" />
+              </div>
             </div>
           </div>
           <div className="flex gap-2">

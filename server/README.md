@@ -31,6 +31,26 @@
 $ pnpm install
 ```
 
+## Supabase Setup
+
+1. Create a Supabase project.
+2. In SQL Editor, run [supabase/setup.sql](supabase/setup.sql) to create the storage bucket and public read policy.
+3. Configure server env in [.env.local](.env.local):
+
+```bash
+DATABASE_URL=postgresql://postgres:<db-password>@db.<project-ref>.supabase.co:5432/postgres
+DB_SSL=true
+SUPABASE_URL=https://<project-ref>.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
+SUPABASE_STORAGE_BUCKET=web-shop
+```
+
+Notes:
+- TypeORM will create/update product/category/image tables in Supabase Postgres when the app boots (based on current entities).
+- Admin image uploads now go to Supabase Storage bucket `web-shop` via `/images/upload`.
+- If Supabase storage env is not set yet, uploads fall back to local `/uploads` automatically.
+- Query APIs remain the same: `/products`, `/products-categories`, `/images`, `/content`.
+
 ## Compile and run the project
 
 ```bash

@@ -1,4 +1,5 @@
 import { useContentSettings } from '@/features/content/content-store'
+import { resolveImageUrl } from '@/lib/utils'
 
 export function AboutPage() {
   const content = useContentSettings()
@@ -20,7 +21,7 @@ export function AboutPage() {
         <div className="rounded-3xl border border-ink/10 bg-white p-4 shadow-soft">
           {images[0]?.url ? (
             <img
-              src={`${import.meta.env.VITE_API_URL}${images[0].url}`}
+              src={resolveImageUrl(images[0].url)}
               alt={content.about.title}
               className="h-[360px] w-full rounded-2xl object-cover"
             />
@@ -35,7 +36,7 @@ export function AboutPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
         {images.map((image) => (
           <article key={image.id} className="overflow-hidden rounded-2xl border border-ink/10 bg-white p-2 shadow-soft">
-            <img src={`${import.meta.env.VITE_API_URL}${image.url}`} alt={content.about.title} className="h-44 w-full rounded-xl object-cover" />
+            <img src={resolveImageUrl(image.url)} alt={content.about.title} className="h-44 w-full rounded-xl object-cover" />
           </article>
         ))}
         {images.length === 0 ? <p className="text-sm text-ink/60">No images yet.</p> : null}

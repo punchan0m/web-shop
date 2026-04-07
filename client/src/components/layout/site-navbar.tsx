@@ -15,9 +15,9 @@ export function SiteNavbar() {
   const content = useContentSettings()
 
   return (
-    <header className="sticky top-0 z-40 border-b border-ink/10 bg-parchment/90 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-ink/10 backdrop-blur" style={{ background: 'rgba(249, 249, 252, 0.9)' }}>
       <nav className="flex h-16 w-full items-center justify-between px-4 md:px-8">
-        <span className="font-display text-xl font-extrabold tracking-tight text-ink">
+        <span className="font-display text-xl font-extrabold tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
           {content.layout.navbarTitle || 'shopname'}
         </span>
 
@@ -28,10 +28,13 @@ export function SiteNavbar() {
               to={item.to}
               className={({ isActive }) =>
                 cn(
-                  'text-sm font-semibold text-ink/70 transition hover:text-ink',
-                  isActive && 'text-brass',
+                  'text-sm font-semibold transition',
+                  isActive && 'font-bold',
                 )
               }
+              style={({ isActive }) => ({
+                color: isActive ? 'var(--theme-primary)' : 'var(--theme-text-secondary)',
+              })}
             >
               {item.label}
             </NavLink>

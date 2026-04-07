@@ -19,10 +19,12 @@ import { useCreateProductWithUpload } from '@/features/product/hooks/use-create-
 import { useDeleteProduct } from '@/features/product/hooks/use-delete-product'
 import { useUpdateProduct } from '@/features/product/hooks/use-update-product'
 import { AdminContentPanel } from '@/pages/admin/content-panel'
+import { resolveImageUrl } from '@/lib/utils'
 
 const NAME_MAX = 30
 const DESCRIPTION_MAX = 200
 const IMAGE_MAX = 5
+const safeName = (value?: string | null) => value || ''
 
 type FilePickerProps = {
   id: string
@@ -84,6 +86,7 @@ export function AdminPage() {
   const [productFilterCategoryId, setProductFilterCategoryId] = useState('all')
   const [editingProductId, setEditingProductId] = useState<string | null>(null)
   const [editingProductName, setEditingProductName] = useState('')
+  const [editingProductPrice, setEditingProductPrice] = useState('')
   const [editingProductDescription, setEditingProductDescription] = useState('')
   const [editingProductFiles, setEditingProductFiles] = useState<File[]>([])
   const [editingProductCategoryQuery, setEditingProductCategoryQuery] = useState('')
@@ -106,11 +109,11 @@ export function AdminPage() {
   const deleteImage = useDeleteImage()
 
   const sortedCategories = useMemo(() => {
-    return [...categories].sort((a, b) => a.name.localeCompare(b.name))
+    return [...categories].sort((a, b) => safeName(a.name).localeCompare(safeName(b.name)))
   }, [categories])
 
   const sortedProducts = useMemo(() => {
-    return [...products].sort((a, b) => a.name.localeCompare(b.name))
+    return [...products].sort((a, b) => safeName(a.name).localeCompare(safeName(b.name)))
   }, [products])
 
   const filteredCreateCategories = useMemo(() => {
@@ -145,7 +148,7 @@ export function AdminPage() {
       if (!aSelected && bSelected) {
         return 1
       }
-      return a.name.localeCompare(b.name)
+      return safeName(a.name).localeCompare(safeName(b.name))
     })
   }, [sortedCategories, editingProductCategoryQuery, editingSelectedCategoryIds])
 
@@ -243,6 +246,7 @@ export function AdminPage() {
     const form = event.currentTarget
     const formData = new FormData(form)
     const name = String(formData.get('name') || '')
+    const priceText = String(formData.get('price') || '')
     const description = String(formData.get('description') || '')
 
     const message = validateText(name, description)
@@ -256,10 +260,17 @@ export function AdminPage() {
       return
     }
 
+    const price = priceText.trim() ? Number(priceText) : undefined
+    if (typeof price !== 'undefined' && (Number.isNaN(price) || price < 0)) {
+      window.alert('Price must be a number greater than or equal to 0.')
+      return
+    }
+
     try {
       if (createProductFiles.length > 0) {
         await createProductWithUpload.mutateAsync({
           name: name.trim(),
+          price,
           description: description.trim() || undefined,
           categoryIds: createSelectedCategoryIds,
           files: createProductFiles,
@@ -267,6 +278,7 @@ export function AdminPage() {
       } else {
         await createProduct.mutateAsync({
           name: name.trim(),
+          price,
           description: description.trim() || undefined,
           categoryIds: createSelectedCategoryIds,
         })
@@ -285,8 +297,10 @@ export function AdminPage() {
   }
 
   const beginEditProduct = (id: string, name: string, description?: string, categoryIds?: string[]) => {
+    const found = sortedProducts.find((item) => item.id === id)
     setEditingProductId(id)
     setEditingProductName(name)
+    setEditingProductPrice(typeof found?.price === 'number' ? String(found.price) : '')
     setEditingProductDescription(description || '')
     setEditingProductFiles([])
     setEditingProductCategoryQuery('')
@@ -347,11 +361,18 @@ export function AdminPage() {
       return
     }
 
+    const parsedPrice = editingProductPrice.trim() ? Number(editingProductPrice) : undefined
+    if (typeof parsedPrice !== 'undefined' && (Number.isNaN(parsedPrice) || parsedPrice < 0)) {
+      window.alert('Price must be a number greater than or equal to 0.')
+      return
+    }
+
     try {
       await updateProduct.mutateAsync({
         id: editingProductId,
         data: {
           name: editingProductName.trim(),
+          price: parsedPrice,
           description: editingProductDescription.trim() || undefined,
           categoryIds: editingSelectedCategoryIds,
         },
@@ -492,7 +513,7 @@ export function AdminPage() {
                       <div className="grid gap-2 sm:grid-cols-3">
                         {(category.images || []).map((image) => (
                           <div key={image.id || image.url} className="overflow-hidden rounded-lg border border-ink/10 p-1">
-                            <img src={`${import.meta.env.VITE_API_URL}${image.url}`} alt={category.name} className="h-20 w-full rounded object-cover" />
+                            <img src={resolveImageUrl(image.url)} alt={category.name} className="h-20 w-full rounded object-cover" />
                             <Button type="button" className="mt-1 h-8 w-full bg-red-600 text-white hover:bg-red-700" onClick={() => handleDeleteImage(image.id)}>
                               Delete image
                             </Button>
@@ -512,7 +533,7 @@ export function AdminPage() {
                         <p className="line-clamp-2 break-words text-sm text-ink/60">{category.description || 'No description'}</p>
                         <div className="mt-2 flex gap-2 overflow-x-auto">
                           {(category.images || []).map((image) => (
-                            <img key={image.id || image.url} src={`${import.meta.env.VITE_API_URL}${image.url}`} alt={category.name} className="h-14 w-20 rounded object-cover" />
+                            <img key={image.id || image.url} src={resolveImageUrl(image.url)} alt={category.name} className="h-14 w-20 rounded object-cover" />
                           ))}
                         </div>
                       </div>
@@ -533,6 +554,7 @@ export function AdminPage() {
             <h2 className="font-display text-2xl font-bold">Create Product</h2>
             <form onSubmit={handleCreateProduct} className="space-y-3">
               <Input name="name" placeholder="Product name" maxLength={NAME_MAX} />
+              <Input name="price" placeholder="Price (e.g. 199.99)" inputMode="decimal" />
               <Textarea name="description" placeholder="Description" maxLength={DESCRIPTION_MAX} className="min-h-24 max-h-44" />
               <FilePicker
                 id="create-product-files"
@@ -587,6 +609,7 @@ export function AdminPage() {
                   {editingProductId === product.id ? (
                     <div className="space-y-2">
                       <Input maxLength={NAME_MAX} value={editingProductName} onChange={(event) => setEditingProductName(event.target.value)} />
+                      <Input value={editingProductPrice} inputMode="decimal" placeholder="Price" onChange={(event) => setEditingProductPrice(event.target.value)} />
                       <Textarea value={editingProductDescription} maxLength={DESCRIPTION_MAX} className="min-h-24 max-h-44" onChange={(event) => setEditingProductDescription(event.target.value)} />
                       <FilePicker
                         id={`edit-product-files-${product.id}`}
@@ -620,7 +643,7 @@ export function AdminPage() {
                       <div className="grid gap-2 sm:grid-cols-3">
                         {(product.images || []).map((image) => (
                           <div key={image.id || image.url} className="overflow-hidden rounded-lg border border-ink/10 p-1">
-                            <img src={`${import.meta.env.VITE_API_URL}${image.url}`} alt={product.name} className="h-20 w-full rounded object-cover" />
+                            <img src={resolveImageUrl(image.url)} alt={product.name} className="h-20 w-full rounded object-cover" />
                             <Button type="button" className="mt-1 h-8 w-full bg-red-600 text-white hover:bg-red-700" onClick={() => handleDeleteImage(image.id)}>
                               Delete image
                             </Button>
@@ -637,11 +660,12 @@ export function AdminPage() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="truncate font-semibold text-ink">{product.name}</p>
+                        <p className="text-sm font-extrabold text-ink">{typeof product.price === 'number' ? `$${product.price.toFixed(2)}` : 'N/A'}</p>
                         <p className="truncate text-xs uppercase tracking-[0.15em] text-brass">{(product.categories || []).map((item) => item.name).join(' / ') || 'Uncategorized'}</p>
                         <p className="line-clamp-2 break-words text-sm text-ink/60">{product.description || 'No description'}</p>
                         <div className="mt-2 flex gap-2 overflow-x-auto">
                           {(product.images || []).map((image) => (
-                            <img key={image.id || image.url} src={`${import.meta.env.VITE_API_URL}${image.url}`} alt={product.name} className="h-14 w-20 rounded object-cover" />
+                            <img key={image.id || image.url} src={resolveImageUrl(image.url)} alt={product.name} className="h-14 w-20 rounded object-cover" />
                           ))}
                         </div>
                       </div>

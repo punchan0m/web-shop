@@ -1,120 +1,318 @@
-import { apiClient } from '@/services/api-client'
+import { supabase } from '@/lib/supabase'
 import type {
   AboutContent,
   ContactContent,
   ContentSettings,
   HomeContent,
   LayoutContent,
+  ThemeContent,
 } from '@/features/content/types'
 
 type ApiContentSettings = {
-  siteName?: string
-  footerLeft?: string
-  footerRight?: string
-  homeTitle?: string
-  homeDescription?: string
-  homeImages?: Array<{ id?: string; url?: string }>
-  aboutTitle?: string
-  aboutDescription?: string
-  aboutImages?: Array<{ id?: string; url?: string }>
-  contactTitle?: string
-  contactDescription?: string
-  contactMapQuery?: string
-  contactEmail?: string
-  contactGmail?: string
-  contactPhone?: string
-  contactPhoneAlt?: string
-  contactFacebook?: string
-  contactInstagram?: string
-  contactLine?: string
-  contactZoom?: number
+  id?: string
+  site_name?: string
+  footer_left?: string
+  footer_right?: string
+  theme_primary?: string
+  theme_secondary?: string
+  theme_text_primary?: string
+  theme_text_secondary?: string
+  theme_button_bg?: string
+  theme_button_text?: string
+  home_title?: string
+  home_description?: string
+  about_title?: string
+  about_description?: string
+  contact_title?: string
+  contact_description?: string
+  contact_map_query?: string
+  contact_email?: string
+  contact_gmail?: string
+  contact_phone?: string
+  contact_phone_alt?: string
+  contact_facebook?: string
+  contact_instagram?: string
+  contact_line?: string
+  contact_zoom?: number
 }
 
-function normalizeImages(images?: Array<{ id?: string; url?: string }>) {
-  return (images || [])
-    .filter((image) => Boolean(image?.id && image?.url))
-    .map((image) => ({ id: image.id as string, url: image.url as string }))
+const defaultContent: ContentSettings = {
+  layout: {
+    navbarTitle: 'shopname',
+    footerLeft: 'Curating with intent since 2026.',
+    footerRight: 'shopname',
+  },
+  theme: {
+    primary: '#705d00',
+    secondary: '#e8e2d9',
+    textPrimary: '#2d3339',
+    textSecondary: '#596066',
+    buttonBg: '#705d00',
+    buttonText: '#ffffff',
+  },
+  home: {
+    title: 'Objects with intent, not noise.',
+    description: '',
+    images: [],
+  },
+  about: {
+    title: 'Curation is a product decision.',
+    description: '',
+    images: [],
+  },
+  contact: {
+    title: 'Studio',
+    description: '',
+    email: 'support@editorial-merchant.local',
+    mapQuery: 'Q8MV+GJ Pak Trae, Ranot District, Songkhla',
+    phone: '',
+    phoneAlt: '',
+    facebook: '',
+    instagram: '',
+    line: '',
+    zoom: 14,
+  },
+}
+
+function isMissingTableError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false
+
+  const maybeError = error as { code?: string; message?: string }
+  return (
+    maybeError.code === 'PGRST205' ||
+    (typeof maybeError.message === 'string' &&
+      maybeError.message.includes('Could not find the table'))
+  )
 }
 
 function normalizeContent(raw: ApiContentSettings): ContentSettings {
   return {
     layout: {
-      navbarTitle: raw.siteName || 'shopname',
-      footerLeft: raw.footerLeft || 'Curating with intent since 2026.',
-      footerRight: raw.footerRight || 'shopname',
+      navbarTitle: raw.site_name || defaultContent.layout.navbarTitle,
+      footerLeft: raw.footer_left || defaultContent.layout.footerLeft,
+      footerRight: raw.footer_right || defaultContent.layout.footerRight,
+    },
+    theme: {
+      primary: raw.theme_primary || defaultContent.theme.primary,
+      secondary: raw.theme_secondary || defaultContent.theme.secondary,
+      textPrimary: raw.theme_text_primary || defaultContent.theme.textPrimary,
+      textSecondary: raw.theme_text_secondary || defaultContent.theme.textSecondary,
+      buttonBg: raw.theme_button_bg || defaultContent.theme.buttonBg,
+      buttonText: raw.theme_button_text || defaultContent.theme.buttonText,
     },
     home: {
-      title: raw.homeTitle || 'Objects with intent, not noise.',
-      description: raw.homeDescription || '',
-      images: normalizeImages(raw.homeImages),
+      title: raw.home_title || defaultContent.home.title,
+      description: raw.home_description || '',
+      images: [],
     },
     about: {
-      title: raw.aboutTitle || 'Curation is a product decision.',
-      description: raw.aboutDescription || '',
-      images: normalizeImages(raw.aboutImages),
+      title: raw.about_title || defaultContent.about.title,
+      description: raw.about_description || '',
+      images: [],
     },
     contact: {
-      title: raw.contactTitle || 'Studio',
-      description: raw.contactDescription || '',
-      email: raw.contactEmail || 'support@editorial-merchant.local',
-      mapQuery: raw.contactMapQuery || 'Q8MV+GJ Pak Trae, Ranot District, Songkhla',
-      phone: raw.contactPhone || '',
-      phoneAlt: raw.contactPhoneAlt || '',
-      facebook: raw.contactFacebook || '',
-      instagram: raw.contactInstagram || '',
-      line: raw.contactLine || '',
-      zoom: typeof raw.contactZoom === 'number' ? raw.contactZoom : 14,
+      title: raw.contact_title || defaultContent.contact.title,
+      description: raw.contact_description || '',
+      email: raw.contact_email || defaultContent.contact.email,
+      mapQuery: raw.contact_map_query || defaultContent.contact.mapQuery,
+      phone: raw.contact_phone || '',
+      phoneAlt: raw.contact_phone_alt || '',
+      facebook: raw.contact_facebook || '',
+      instagram: raw.contact_instagram || '',
+      line: raw.contact_line || '',
+      zoom: typeof raw.contact_zoom === 'number' ? raw.contact_zoom : 14,
     },
   }
 }
 
-function toFormData(files: File[]) {
-  const formData = new FormData()
-  files.forEach((file) => formData.append('files', file))
-  return formData
+async function getOrCreateContentSettingsRow(): Promise<ApiContentSettings> {
+  const { data, error } = await supabase
+    .from('content_settings')
+    .select('*')
+    .limit(1)
+    .maybeSingle()
+
+  if (error) {
+    if (isMissingTableError(error)) {
+      return {
+        site_name: defaultContent.layout.navbarTitle,
+        footer_left: defaultContent.layout.footerLeft,
+        footer_right: defaultContent.layout.footerRight,
+        theme_primary: defaultContent.theme.primary,
+        theme_secondary: defaultContent.theme.secondary,
+        theme_text_primary: defaultContent.theme.textPrimary,
+        theme_text_secondary: defaultContent.theme.textSecondary,
+        theme_button_bg: defaultContent.theme.buttonBg,
+        theme_button_text: defaultContent.theme.buttonText,
+        home_title: defaultContent.home.title,
+        home_description: defaultContent.home.description,
+        about_title: defaultContent.about.title,
+        about_description: defaultContent.about.description,
+        contact_title: defaultContent.contact.title,
+        contact_description: defaultContent.contact.description,
+        contact_email: defaultContent.contact.email,
+        contact_map_query: defaultContent.contact.mapQuery,
+        contact_zoom: defaultContent.contact.zoom,
+      }
+    }
+    throw error
+  }
+
+  if (data) {
+    return data as ApiContentSettings
+  }
+
+  const { data: inserted, error: insertError } = await supabase
+    .from('content_settings')
+    .insert([
+      {
+        site_name: defaultContent.layout.navbarTitle,
+        footer_left: defaultContent.layout.footerLeft,
+        footer_right: defaultContent.layout.footerRight,
+        theme_primary: defaultContent.theme.primary,
+        theme_secondary: defaultContent.theme.secondary,
+        theme_text_primary: defaultContent.theme.textPrimary,
+        theme_text_secondary: defaultContent.theme.textSecondary,
+        theme_button_bg: defaultContent.theme.buttonBg,
+        theme_button_text: defaultContent.theme.buttonText,
+        home_title: defaultContent.home.title,
+        home_description: defaultContent.home.description,
+        about_title: defaultContent.about.title,
+        about_description: defaultContent.about.description,
+        contact_title: defaultContent.contact.title,
+        contact_description: defaultContent.contact.description,
+        contact_email: defaultContent.contact.email,
+        contact_map_query: defaultContent.contact.mapQuery,
+        contact_zoom: defaultContent.contact.zoom,
+      },
+    ])
+    .select('*')
+    .single()
+
+  if (insertError) {
+    throw insertError
+  }
+
+  return inserted as ApiContentSettings
 }
 
 export async function getContent(): Promise<ContentSettings> {
-  const res = await apiClient.get<ApiContentSettings>('/content')
-  return normalizeContent(res.data)
+  const row = await getOrCreateContentSettingsRow()
+
+  const { data: contentImages, error: imagesError } = await supabase
+    .from('images')
+    .select('id, url, content_section')
+    .in('content_section', ['home', 'about'])
+    .order('created_at', { ascending: false })
+
+  if (imagesError && !isMissingTableError(imagesError)) {
+    throw imagesError
+  }
+
+  const normalized = normalizeContent(row)
+  const list = contentImages || []
+
+  return {
+    ...normalized,
+    home: {
+      ...normalized.home,
+      images: list
+        .filter((item) => item.content_section === 'home')
+        .map((item) => ({ id: item.id, url: item.url })),
+    },
+    about: {
+      ...normalized.about,
+      images: list
+        .filter((item) => item.content_section === 'about')
+        .map((item) => ({ id: item.id, url: item.url })),
+    },
+  }
 }
 
-export async function updateLayoutContent(data: LayoutContent): Promise<ContentSettings> {
-  const res = await apiClient.patch<ApiContentSettings>('/content/layout', data)
-  return normalizeContent(res.data)
+export async function updateLayoutContent(data: LayoutContent & { theme: ThemeContent }): Promise<ContentSettings> {
+  const row = await getOrCreateContentSettingsRow()
+  if (!row.id) return defaultContent
+
+  const { data: result, error } = await supabase
+    .from('content_settings')
+    .update({
+      site_name: data.navbarTitle,
+      footer_left: data.footerLeft,
+      footer_right: data.footerRight,
+      theme_primary: data.theme.primary,
+      theme_secondary: data.theme.secondary,
+      theme_text_primary: data.theme.textPrimary,
+      theme_text_secondary: data.theme.textSecondary,
+      theme_button_bg: data.theme.buttonBg,
+      theme_button_text: data.theme.buttonText,
+    })
+    .eq('id', row.id)
+    .select()
+    .single()
+  
+  if (error) throw error
+  return normalizeContent(result as ApiContentSettings)
 }
 
 export async function updateHomeContent(data: HomeContent & { siteName?: string }): Promise<ContentSettings> {
-  const res = await apiClient.patch<ApiContentSettings>('/content/home', data)
-  return normalizeContent(res.data)
+  const row = await getOrCreateContentSettingsRow()
+  if (!row.id) return defaultContent
+
+  const { data: result, error } = await supabase
+    .from('content_settings')
+    .update({
+      site_name: data.siteName,
+      home_title: data.title,
+      home_description: data.description,
+    })
+    .eq('id', row.id)
+    .select()
+    .single()
+  
+  if (error) throw error
+  return normalizeContent(result as ApiContentSettings)
 }
 
 export async function updateAboutContent(data: AboutContent): Promise<ContentSettings> {
-  const res = await apiClient.patch<ApiContentSettings>('/content/about', data)
-  return normalizeContent(res.data)
+  const row = await getOrCreateContentSettingsRow()
+  if (!row.id) return defaultContent
+
+  const { data: result, error } = await supabase
+    .from('content_settings')
+    .update({
+      about_title: data.title,
+      about_description: data.description,
+    })
+    .eq('id', row.id)
+    .select()
+    .single()
+  
+  if (error) throw error
+  return normalizeContent(result as ApiContentSettings)
 }
 
 export async function updateContactContent(data: ContactContent): Promise<ContentSettings> {
-  const res = await apiClient.patch<ApiContentSettings>('/content/contact', data)
-  return normalizeContent(res.data)
-}
+  const row = await getOrCreateContentSettingsRow()
+  if (!row.id) return defaultContent
 
-export async function uploadHomeImages(files: File[]): Promise<ContentSettings> {
-  const res = await apiClient.post<ApiContentSettings>('/content/home/images', toFormData(files))
-  return normalizeContent(res.data)
-}
-
-export async function uploadAboutImages(files: File[]): Promise<ContentSettings> {
-  const res = await apiClient.post<ApiContentSettings>('/content/about/images', toFormData(files))
-  return normalizeContent(res.data)
-}
-
-export async function deleteHomeImage(imageId: string): Promise<ContentSettings> {
-  const res = await apiClient.delete<ApiContentSettings>(`/content/home/images/${imageId}`)
-  return normalizeContent(res.data)
-}
-
-export async function deleteAboutImage(imageId: string): Promise<ContentSettings> {
-  const res = await apiClient.delete<ApiContentSettings>(`/content/about/images/${imageId}`)
-  return normalizeContent(res.data)
+  const { data: result, error } = await supabase
+    .from('content_settings')
+    .update({
+      contact_title: data.title,
+      contact_description: data.description,
+      contact_email: data.email,
+      contact_map_query: data.mapQuery,
+      contact_phone: data.phone,
+      contact_phone_alt: data.phoneAlt,
+      contact_facebook: data.facebook,
+      contact_instagram: data.instagram,
+      contact_line: data.line,
+      contact_zoom: data.zoom,
+    })
+    .eq('id', row.id)
+    .select()
+    .single()
+  
+  if (error) throw error
+  return normalizeContent(result as ApiContentSettings)
 }

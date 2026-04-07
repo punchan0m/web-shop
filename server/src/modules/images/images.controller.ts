@@ -14,29 +14,11 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { existsSync, mkdirSync } from 'fs';
-import { extname, join } from 'path';
-import { randomUUID } from 'crypto';
+import { memoryStorage } from 'multer';
 import { ImagesService } from './images.service';
 import { CreateImageDto } from './dto/create-image.dto';
 import { UpdateImageDto } from './dto/update-image.dto';
 import { UploadImageDto } from './dto/upload-image.dto';
-
-const uploadDir = join(process.cwd(), 'src', 'uploads');
-
-const storage = diskStorage({
-  destination: (_req, _file, cb) => {
-    if (!existsSync(uploadDir)) {
-      mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: (_req, file, cb) => {
-    const fileExtension = extname(file.originalname);
-    cb(null, `${randomUUID()}${fileExtension}`);
-  },
-});
 
 const imageFileFilter = (_req: unknown, file: Express.Multer.File, cb: (error: Error | null, acceptFile: boolean) => void) => {
   if (!file.mimetype.startsWith('image/')) {
@@ -60,7 +42,7 @@ export class ImagesController {
   @Post('upload')
   @UseInterceptors(
     FileInterceptor('file', {
-      storage,
+      storage: memoryStorage(),
       fileFilter: imageFileFilter,
       limits: { fileSize: 5 * 1024 * 1024 },
     }),
@@ -74,8 +56,8 @@ export class ImagesController {
       throw new HttpException('file is required', HttpStatus.BAD_REQUEST);
     }
 
-    return this.service.create({
-      url: `/uploads/${file.filename}`,
+    return this.service.uploadAndCreate({
+      file,
       productId: dto.productId,
       categoryId: dto.categoryId,
     });

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { Product } from '@/features/product/types'
 import { Card } from '@/components/ui/card'
+import { resolveImageUrl } from '@/lib/utils'
 
 type ProductCardProps = {
   product: Product
@@ -12,6 +13,9 @@ export function ProductCard({ product }: ProductCardProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   const currentImage = images[currentImageIndex]
+  const formattedPrice = typeof product.price === 'number'
+    ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(product.price)
+    : 'N/A'
 
   const goPrev = () => {
     if (images.length <= 1) {
@@ -29,12 +33,23 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <>
-      <button type="button" className="w-full text-left" onClick={() => setIsOpen(true)}>
+      <div
+        role="button"
+        tabIndex={0}
+        className="w-full cursor-pointer text-left"
+        onClick={() => setIsOpen(true)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
+            setIsOpen(true)
+          }
+        }}
+      >
         <Card className="overflow-hidden p-0">
           <div className="relative aspect-[4/3] bg-ash/40">
             {currentImage?.url ? (
               <img
-                src={`${import.meta.env.VITE_API_URL}${currentImage.url}`}
+                src={resolveImageUrl(currentImage.url)}
                 alt={product.name}
                 className="h-full w-full object-cover"
               />
@@ -78,10 +93,11 @@ export function ProductCard({ product }: ProductCardProps) {
               {(product.categories || []).map((item) => item.name).join(' / ') || 'Uncategorized'}
             </p>
             <h3 className="truncate font-display text-lg font-bold text-ink">{product.name}</h3>
+            <p className="text-sm font-extrabold text-ink">{formattedPrice}</p>
             <p className="line-clamp-2 min-h-10 break-words text-sm text-ink/70">{product.description || 'No description yet.'}</p>
           </div>
         </Card>
-      </button>
+      </div>
 
       {isOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setIsOpen(false)}>
@@ -89,7 +105,7 @@ export function ProductCard({ product }: ProductCardProps) {
             {images.length > 0 ? (
               <div className="relative aspect-[16/10] overflow-hidden rounded-xl bg-ash/40">
                 <img
-                  src={`${import.meta.env.VITE_API_URL}${images[currentImageIndex]?.url}`}
+                  src={resolveImageUrl(images[currentImageIndex]?.url)}
                   alt={product.name}
                   className="h-full w-full object-cover"
                 />
@@ -120,6 +136,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 {(product.categories || []).map((item) => item.name).join(' / ') || 'Uncategorized'}
               </p>
               <h3 className="line-clamp-2 break-words font-display text-2xl font-bold text-ink">{product.name}</h3>
+              <p className="text-base font-extrabold text-ink">{formattedPrice}</p>
               <p className="max-h-48 overflow-y-auto break-words text-sm text-ink/75">{product.description || 'No description yet.'}</p>
             </div>
 
