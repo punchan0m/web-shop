@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { ROUTES } from '@/constants/routes'
 import { cn } from '@/lib/utils'
@@ -13,6 +14,7 @@ const navItems = [
 
 export function SiteNavbar() {
   const content = useContentSettings()
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
     <header className="sticky top-0 z-40 border-b border-ink/10 backdrop-blur" style={{ background: 'rgba(249, 249, 252, 0.9)' }}>
@@ -21,6 +23,7 @@ export function SiteNavbar() {
           {content.layout.navbarTitle || 'shopname'}
         </span>
 
+        {/* Desktop Menu */}
         <div className="hidden items-center gap-5 md:flex">
           {navItems.map((item) => (
             <NavLink
@@ -40,7 +43,46 @@ export function SiteNavbar() {
             </NavLink>
           ))}
         </div>
+
+        {/* Hamburger Menu Button (Mobile) */}
+        <button
+          type="button"
+          className="relative z-50 flex h-8 w-8 flex-col items-center justify-center gap-1.5 md:hidden"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          style={{ color: 'var(--theme-text-primary)' }}
+        >
+          <span className={`h-0.5 w-6 transition-all ${isMenuOpen ? 'translate-y-2 rotate-45' : ''}`} style={{ backgroundColor: 'currentColor' }} />
+          <span className={`h-0.5 w-6 transition-all ${isMenuOpen ? 'opacity-0' : ''}`} style={{ backgroundColor: 'currentColor' }} />
+          <span className={`h-0.5 w-6 transition-all ${isMenuOpen ? '-translate-y-2 -rotate-45' : ''}`} style={{ backgroundColor: 'currentColor' }} />
+        </button>
       </nav>
+
+      {/* Mobile Menu Dropdown */}
+      {isMenuOpen && (
+        <div className="border-t border-ink/10 bg-white md:hidden" style={{ background: 'rgba(249, 249, 252, 0.95)' }}>
+          <div className="space-y-1 px-4 py-3">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) =>
+                  cn(
+                    'block rounded-lg px-3 py-2 text-sm font-semibold transition',
+                    isActive ? 'font-bold' : '',
+                  )
+                }
+                style={({ isActive }) => ({
+                  color: isActive ? 'white' : 'var(--theme-text-secondary)',
+                  backgroundColor: isActive ? 'var(--theme-primary)' : 'transparent',
+                })}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </div>
+        </div>
+      )}
     </header>
   )
 }
