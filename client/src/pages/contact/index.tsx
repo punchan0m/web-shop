@@ -44,14 +44,14 @@ export function ContactPage() {
   return (
     <section className="mx-auto w-full max-w-6xl space-y-6">
       <div className="rounded-3xl border border-ink/10 bg-white/90 p-7 shadow-soft">
-        <p className="text-xs uppercase tracking-[0.25em] text-brass">Contect</p>
+        <p className="text-xs uppercase tracking-[0.25em] text-brass">ติดต่อเรา</p>
         <h1 className="mt-2 font-display text-4xl font-extrabold text-ink">{content.contact.title}</h1>
         <p className="mt-3 max-w-3xl text-base text-ink/70">{content.contact.description}</p>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.05fr_1fr]">
         <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-ink/10 bg-white p-6 shadow-soft">
-          <p className="text-sm font-semibold text-ink">Send us a message</p>
+          <p className="text-sm font-semibold text-ink">ส่งข้อความถึงเรา</p>
           <div className="space-y-1">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink/60">Name</p>
             <Input name="name" placeholder="Name" />

@@ -9,7 +9,7 @@ export function AboutPage() {
     <section className="mx-auto w-full max-w-6xl space-y-8">
       <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr] lg:items-start">
         <div className="rounded-3xl border border-ink/10 bg-white/90 p-7 shadow-soft">
-          <p className="text-xs font-bold uppercase tracking-[0.25em] text-brass">About us</p>
+          <p className="text-xs font-bold uppercase tracking-[0.25em] text-brass">เกี่ยวกับเรา</p>
           <h1 className="mt-3 font-display text-4xl font-extrabold leading-tight text-ink md:text-5xl">
             {content.about.title}
           </h1>

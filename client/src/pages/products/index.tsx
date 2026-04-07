@@ -192,12 +192,12 @@ export function ProductsPage() {
 
       <div className="min-w-0 flex-1 space-y-8">
         <div className="space-y-4 rounded-xl border p-6" style={{ background: 'color-mix(in srgb, var(--theme-secondary) 35%, white)', borderColor: 'color-mix(in srgb, var(--theme-text-primary) 12%, transparent)' }}>
-          <p className="text-[11px] font-bold uppercase tracking-[0.24em]" style={{ color: 'var(--theme-primary)' }}>Catalog</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.24em]" style={{ color: 'var(--theme-primary)' }}>หมวดหมู่สินค้า</p>
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div className="space-y-2">
-              <h1 className="text-3xl font-extrabold tracking-tight">Precision Instrumentation</h1>
+              <h1 className="text-3xl font-extrabold tracking-tight">สินค้าคุณภาพสูง</h1>
               <p className="max-w-2xl text-sm" style={{ color: 'var(--theme-text-secondary)' }}>
-                Professional grade calibration and measurement equipment designed for extreme accuracy.
+                ยกระดับมาตรฐานด้วยอุปกรณ์เกรดมืออาชีพ
               </p>
             </div>
 
