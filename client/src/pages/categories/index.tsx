@@ -71,8 +71,8 @@ export function CategoriesPage() {
   return (
     <section className="mx-auto w-full max-w-[1440px] space-y-10" style={{ color: 'var(--theme-text-primary)' }}>
       <div className="space-y-4">
-        <p className="text-[11px] font-bold uppercase tracking-[0.24em]" style={{ color: 'var(--theme-primary)' }}>Product Catalog</p>
-        <h1 className="text-4xl font-extrabold tracking-tight md:text-5xl">Instrument Categories</h1>
+        <p className="text-[11px] font-bold uppercase tracking-[0.24em]" style={{ color: 'var(--theme-primary)' }}>หมวดหมู่ สินค้า</p>
+        <h1 className="text-4xl font-extrabold tracking-tight md:text-5xl">หมวดหมู่</h1>
         <div className="h-1 w-24" style={{ backgroundColor: 'var(--theme-primary)' }} />
       </div>
 

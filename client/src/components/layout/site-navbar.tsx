@@ -4,11 +4,11 @@ import { cn } from '@/lib/utils'
 import { useContentSettings } from '@/features/content/content-store'
 
 const navItems = [
-  { label: 'Home', to: ROUTES.home },
-  { label: 'Category', to: ROUTES.categories },
-  { label: 'Product', to: ROUTES.products },
-  { label: 'About', to: ROUTES.about },
-  { label: 'Contect', to: ROUTES.contact },
+  { label: 'หน้าแรก', to: ROUTES.home },
+  { label: 'หมวดหมู่', to: ROUTES.categories },
+  { label: 'สินค้า', to: ROUTES.products },
+  { label: 'เกี่ยวกับเรา', to: ROUTES.about },
+  { label: 'ติดต่อ', to: ROUTES.contact },
 ]
 
 export function SiteNavbar() {
