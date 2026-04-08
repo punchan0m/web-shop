@@ -18,8 +18,8 @@ import { resolveImageUrl } from '@/lib/utils'
 const HOME_IMAGE_MAX = 5
 const ABOUT_IMAGE_MAX = 20
 const NAME_MAX = 30
-const DESCRIPTION_MAX = 200
-const HOME_DESCRIPTION_MAX = 5000
+const DESCRIPTION_MAX = 500
+const HOME_DESCRIPTION_MAX = 500
 const DEFAULT_MAP_QUERY = 'Q8MV+GJ Pak Trae, Ranot District, Songkhla'
 const FOOTER_MAX = 120
 

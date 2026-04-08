@@ -660,7 +660,7 @@ export function AdminPage() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="truncate font-semibold text-ink">{product.name}</p>
-                        <p className="text-sm font-extrabold text-ink">{typeof product.price === 'number' ? `$${product.price.toFixed(2)}` : 'N/A'}</p>
+                        <p className="text-sm font-extrabold text-ink">{typeof product.price === 'number' ? `฿${product.price.toFixed(2)}` : 'N/A'}</p>
                         <p className="truncate text-xs uppercase tracking-[0.15em] text-brass">{(product.categories || []).map((item) => item.name).join(' / ') || 'Uncategorized'}</p>
                         <p className="line-clamp-2 break-words text-sm text-ink/60">{product.description || 'No description'}</p>
                         <div className="mt-2 flex gap-2 overflow-x-auto">
